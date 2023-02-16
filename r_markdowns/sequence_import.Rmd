@@ -26,8 +26,12 @@ editor_options:
     wrap: 72
 ---
 
+# Initial document dump
+[Pooled Amplicon Experiment](https://docs.google.com/document/d/1YRjikGYGGN6P9ZY36nNZMrqFOs_UfweKkipn1_YooO4/edit)
 
+[Github repo with code](https://github.com/naobservatory/phagemid-design/tree/main/analysis/2022-06-06-nanopore-analysis)
 
+AWS S3 bucket with data: s3://summer-seq-data/230203laura.tar
 # Introduction
 Here we import, format, and clean
 
