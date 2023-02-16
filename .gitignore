@@ -50,6 +50,11 @@ logs/*
 sequences/*
 !sequences/.gitkeep
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> e5220cd973bfa4e6a0eb9cdcaab3d572e8d9d47e
 # Excluding VSCode settings
 .settings.json
 
