@@ -31,7 +31,13 @@ editor_options:
 
 [Github repo with code](https://github.com/naobservatory/phagemid-design/tree/main/analysis/2022-06-06-nanopore-analysis)
 
+[Pooling spradsheet](https://docs.google.com/spreadsheets/d/12b04wXfEUhwDhB-e1jmSayz_7HByKeuQ8hD0rTrcnv4/edit#gid=0)
+
 AWS S3 bucket with data: s3://summer-seq-data/230203laura.tar
+
+My task according to Mike:
+Data analysis that will be done by Jeff and/or Simon: Compare the measured concentration of each qPCR barcode in two different ways — directly by qPCR of that barcode, and indirectly by summing up the estimated concentrations of the 5 corresponding sequencing barcodes.
+
 # Introduction
 Here we import, format, and clean
 
