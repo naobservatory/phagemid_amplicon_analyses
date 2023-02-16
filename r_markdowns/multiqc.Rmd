@@ -1,0 +1,13 @@
+---
+title: "MultiQC_analysis"
+author: "Simon Grimm"
+date: "2023-02-16"
+output: html_document
+---
+
+```{r, echo=FALSE}
+
+library(htmltools)
+
+htmltools::includeHTML("../output/quality_control/multiqc/multiqc_report.html")
+```
