@@ -8,6 +8,10 @@
 # User-specific files
 .Ruserdata
 
+# Genomic Sequences
+*.fastq.gz
+*.fastq
+
 # Example code in package build process
 *-Ex.R
 
@@ -37,3 +41,24 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Including the logs folder without content
+logs/*
+!logs/.gitkeep
+
+# Including the sequences folder without content
+sequences/*
+!sequences/.gitkeep
+
+# Including the output folder without content
+output/*
+!output/.gitkeep
+
+# Excluding VSCode settings
+.settings.json
+
+#MacOS files
+.DS_Store
+
+# nf-core results
+nf-core-mag/results

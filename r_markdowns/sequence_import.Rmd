@@ -1,0 +1,63 @@
+---
+title: "Sequence Import and Cleaning"
+author:
+  - name: Simon Grimm
+    url: {simongrimm.com}
+date: 2023-02-16
+description: |
+categories:
+draft: false
+output:
+  bookdown::html_document2:
+    toc: yes
+    toc_float: yes
+    toc_collapsed: yes
+    df_print: paged
+    code_folding: show
+    theme: lumen
+    warning: false
+    cache: true
+    echo: false
+    autodep: true
+    cache.comment: false
+    dpi: 300
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+
+
+# Introduction
+Here we import, format, and clean
+
+# Setup
+
+## R packages
+
+```{r, message=FALSE}
+# set of data analysis and viz tools
+library(tidyverse)
+
+# file system helpers
+library(fs)
+library(googlesheets4)
+
+# specifying locations within a project
+library(here)
+
+# plotting helpers
+library(cowplot)
+theme_set(theme_cowplot())
+library(patchwork)
+library(ggbeeswarm)
+```
+
+## Defining directories
+
+```{r, message=FALSE}
+metadata_data_path <- here("data/metadata")
+taxonomy_data_path <- here("data/taxonomy")
+output_data_path <- here("output")
+project_path <- here('../illumina_pilot')
+```
