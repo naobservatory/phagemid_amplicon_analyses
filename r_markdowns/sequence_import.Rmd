@@ -38,6 +38,15 @@ AWS S3 bucket with data: s3://summer-seq-data/230203laura.tar
 My task according to Mike:
 Data analysis that will be done by Jeff and/or Simon: Compare the measured concentration of each qPCR barcode in two different ways — directly by qPCR of that barcode, and indirectly by summing up the estimated concentrations of the 5 corresponding sequencing barcodes.
 
+TODOS:
+ - Concatenate data
+ - align data with primers given by mike
+  		- Forward primer: AGCTTCGGGCCTAACTAACTACT
+		- Reverse primer: CGCTTTACGTTACGTCGAAAGC
+		Mike: "this should be the primers used. You can confirm by loading the Nanopore data into R and looking for the matching sequences., and more generally by aligning the nanopore reads and the primer sequences"
+ - Reach out to anjali to check in on length
+ - Check in with Mike to ask how sequencing worked
+
 # Introduction
 Here we import, format, and clean
 
