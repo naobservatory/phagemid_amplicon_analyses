@@ -9,5 +9,5 @@ output: html_document
 
 library(htmltools)
 
-htmltools::includeHTML("../output/quality_control/multiqc/multiqc_report.html")
+htmltools::includeHTML("../output/quality_control/multiqc/phagemid_amplicon_nanopore/multiqc_report.html")
 ```
