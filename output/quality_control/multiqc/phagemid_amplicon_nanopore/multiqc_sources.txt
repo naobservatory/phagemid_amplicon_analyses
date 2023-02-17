@@ -1,0 +1,2 @@
+Module	Section	Sample Name	Source
+FastQC	all_sections	phagemid_amplicon_nanopore	/Users/simongrimm/Documents/mit/stats/tracer_analyses/output/quality_control/fastqc/phagemid_amplicon_nanopore/phagemid_amplicon_nanopore_fastqc.zip
