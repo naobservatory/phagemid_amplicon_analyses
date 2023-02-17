@@ -61,12 +61,23 @@ Here we import, format, and clean
 # set of data analysis and viz tools
 library(tidyverse)
 
+# parallel processing
+library(furrr)
+
 # file system helpers
 library(fs)
 library(googlesheets4)
 
 # specifying locations within a project
 library(here)
+
+#Fastq file manipulation
+import::from(Biostrings, complement, reverseComplement, width, DNAString,
+  DNAStringSet, readDNAStringSet, subseq,
+  vmatchPDict, vcountPDict
+)
+
+import::from(DECIPHER, TrimDNA, AlignSeqs, OrientNucleotides, BrowseSeqs)
 
 # plotting helpers
 library(cowplot)
@@ -82,4 +93,9 @@ metadata_data_path <- here("data/metadata")
 taxonomy_data_path <- here("data/taxonomy")
 output_data_path <- here("output")
 project_path <- here('../illumina_pilot')
+```
+
+```{r}
+#Reading in sequencing data
+
 ```

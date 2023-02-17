@@ -1,0 +1,439 @@
+Analyze nanopore data to see which phagemid lines are monomorphic
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(fs)
+library(furrr)
+plan(multicore, workers = 3)
+import::from(Biostrings, complement, reverseComplement, width, DNAString,
+  DNAStringSet, readDNAStringSet, subseq,
+  vmatchPDict, vcountPDict
+)
+import::from(DECIPHER, TrimDNA, AlignSeqs, OrientNucleotides, BrowseSeqs)
+```
+
+```{r}
+seq_barcodes <- here('output', '2022-05-18-sequencing-barcodes',
+  'sequencing-barcodes.csv') %>%
+  read_csv %>%
+  glimpse
+```
+
+Forward and reverse primers for the sequencing barcodes
+
+```{r}
+fwd <- seq_barcodes %>% pull(primer_1) %>% unique
+rev <- seq_barcodes %>% pull(primer_2) %>% unique
+rev_rc <- rev %>% DNAString %>% reverseComplement %>% as.character
+stopifnot(identical(length(fwd), 1L))
+stopifnot(identical(length(rev), 1L))
+```
+
+The eBlock sequences that we ordered:
+
+```{r}
+eblocks <- here('analysis/2022-05-18-sequencing-barcodes',
+  '2022-05-20-eblock-template-mm.csv') %>% read_csv
+```
+
+Map from sequencing index to wells,
+
+```{r}
+```
+
+
+The Sanger sequences, for the three wells that were Sanger sequenced:
+
+```{r}
+sanger <- here('data/2022-06-06-quantification-plasmid-sanger-sequencing/30-712437346.fasta') %>%
+  readDNAStringSet
+```
+
+
+# Improved pipeline - Combo approach
+
+First trim by primers (try both orientations and pick best), then match.
+
+#. Combine all sequences into a single DNAStringSet
+#. Give a common orientation
+#. check that this is the correct oreitnation for the quant barcodes; if not, RC it.
+#. Trim using the primers
+#. Do some QC - check stats of matches; check that see the spacer and probe sequences
+#. For successfully trimmed seqs, match against barcodes
+#. Use to assess single or multiple copies (with some confidence score, based on how many total reads passing QC
+#. Of ones with single q-seq barcode, check that they have the correct qPCR
+#barcode
+#. pick 25 with desired 5X5 design
+
+Should think of some QC to do within each of these steps.
+
+Should also consider if/how to do this for the qPCR barcodes, to check that the
+
+## Combine all sequences into a single DNAStringSet
+
+this is the data that was demultiplexed on june 16
+
+```{r, eval = F}
+fns <- here('data', '2022-06-16-quantification-plasmid-nanopore-sequencing',
+  '220603anjResults/pass') %>%
+  dir_ls(recurse = TRUE, glob = '*.fastq')
+fns %>%
+  str_subset('unclassified', negate = TRUE) %>%
+  length
+#> reads <- readDNAStringSet(fns, format = 'fastq')
+```
+
+Trying to read all the files in with one call to readDNAStringSet leads to an error, I think because of too many open connections.
+
+So instead read each folder in one by one, then join into one DNAStringSet
+
+```{r}
+dirs <- here('data', '2022-06-16-quantification-plasmid-nanopore-sequencing',
+  '220603anjResults/pass') %>%
+  dir_ls
+  # here('data',
+  # '2022-06-03-quantification-plasmid-nanopore-sequencing/reads') %>%
+reads_list <- dirs %>%
+  map(dir_ls, glob = '*.fastq') %>%
+  map(readDNAStringSet, format = 'fastq')
+reads_raw <- reads_list %>% reduce(c)
+# Drop unclassified reads
+reads <- reads_raw %>%
+  {.[str_detect(names(.), 'unclassified', negate = TRUE)]}
+```
+
+Note, the indexing barcode is reported at the end of the read name.
+
+```{r}
+names(reads) %>% str_sub(start = - 14) %>% sample(3)
+```
+
+## Orient all reads to a common reference orientation
+
+First, let's add a reference sequence that we can use to set the orientation.
+
+TODO: Get the full phagemid reference, not just the eblock.
+
+```{r}
+ref <- eblocks %>% slice(1) %>% pull(sequence) %>%
+  set_names('reference') %>%
+  DNAStringSet
+reads_with_ref <- c(ref, reads)
+```
+
+```{r, message = FALSE}
+reads_oriented <- OrientNucleotides(reads_with_ref, reference = 1, processors = 3)
+```
+
+TODO: concider the threshold and orientation settings
+
+## Trim using the flanking sequence
+
+```{r}
+trim_pattern <- seq_barcodes %>%
+  slice(1) %>%
+  transmute(
+    left = str_c(primer_1, spacer_1),
+    right = str_c(spacer_2, probe),
+  ) %>%
+  unlist
+```
+
+```{r, message = FALSE}
+reads_oriented_trimmed <- TrimDNA(
+  reads_oriented,
+  trim_pattern['left'],
+  trim_pattern['right'],
+  minWidth = 20,
+  type = 'sequences'
+)
+```
+
+Does it seem to be working?
+
+```{r}
+probe_length <- seq_barcodes$probe_length %>% unique
+ont_barcode_length <- seq_barcodes$ont_barcode_length %>% unique
+expected_length <- ont_barcode_length
+```
+
+```{r}
+width(reads_oriented) %>% summary
+width(reads_oriented_trimmed) %>% summary
+mean(width(reads_oriented_trimmed) == expected_length)
+mean(width(reads_oriented_trimmed) < 100)
+width(reads_oriented_trimmed) %>% qplot +
+  scale_x_log10() +
+  expand_limits(x = 10) +
+  geom_vline(xintercept = expected_length, color = 'darkred')
+```
+
+Looks like it worked; though most of the reads were not successfully trimmed at both primers.
+
+TODO: consider TrimDNA options and how might increase trimming.
+
+```{r}
+reads_post <- reads_oriented_trimmed %>%
+  {.[width(.) < 100]}
+```
+
+## Do some QC - check stats of matches; check that see the spacer and probe sequences
+
+TODO
+
+## For successfully trimmed seqs, match against barcodes
+
+Get the ONT barcodes for matching,
+
+```{r}
+ont_barcodes <- seq_barcodes %>%
+  select(ont_barcode_id, ont_barcode_sequence) %>%
+  deframe %>%
+  DNAStringSet
+```
+
+TODO: Check what the min edit distance is; use this to determine the max allowed edit distance for matching,
+
+Do once I update Bioconductor and get DNABarcodes installed.
+
+```{r}
+xmat <- vcountPDict(ont_barcodes, reads_post,
+  max.mismatch = 2, with.indels = TRUE)
+rownames(xmat) <- names(ont_barcodes)
+colnames(xmat) <- names(reads_post)
+#> ~vcountPDict(pats, .x, with.indels = TRUE, max.mismatch = 2)),
+```
+
+possible improvements
+
+- get the best match, up to sufficient closeness
+<!--  -->
+
+Check that only one match per read:
+
+```{r}
+stopifnot( (colSums(xmat) %>% max) == 1 )
+```
+
+What fraction of reads match any barcode?
+
+```{r}
+(colSums(xmat) >= 1) %>% mean %>% round(2)
+```
+
+- Turn into a dataframe with one row per read, filtered to matches
+  - for qc, might want to track the total number of reads / non-matches
+- extract the indexing barcode from the read name for well-matching
+<!--  -->
+
+```{r}
+x <- xmat %>%
+  t %>%
+  as_tibble(rownames = 'read_name') %>%
+  pivot_longer(cols = starts_with('BC'), names_to = 'ont_barcode', values_to = 'match') %>%
+  filter(match == 1) %>%
+  select(-match) %>%
+  mutate(
+    index_barcode = str_extract(read_name, '(?<=barcode=bw_)[0-9]{3}$')
+  )
+```
+
+```{r}
+x %>%
+  filter(read_name != 'reference') %>%
+  with_groups(index_barcode, count, ont_barcode)
+```
+
+Notice that there are many cases where a library has one or a few hits to a minority barcode.
+It is worth checking what is going on here.
+
+Save the map from reads to barcodes:
+
+```{r}
+x %>%
+  filter(read_name != 'reference') %>%
+  write_csv('reads-matched-to-sequencing-barcode.csv')
+```
+
+## Use to assess if single or multiple barcodes present
+
+With some confidence score, based on how many total reads passing QC?
+
+
+```{r}
+x_count <- x %>%
+  filter(read_name != 'reference') %>%
+  with_groups(index_barcode, count, ont_barcode) %>%
+  with_groups(index_barcode, mutate,
+    total = sum(n),
+    frac = n / sum(n)
+  )
+```
+
+```{r}
+x_count %>%
+  filter(frac > 0.05, n >= 4) %>%
+  count(index_barcode) %>%
+  pull(n) %>%
+  table
+```
+
+```{r}
+x_count %>%
+  filter(frac > 0.05, n >= 4) %>%
+  add_count(index_barcode) %>%
+  filter(nn>1)
+```
+
+Question - how many secondary hits is acceptable?
+
+### Check the three test wells
+
+Helper function
+
+```{r}
+match_barcode <- function(subject, barcodes, ...) {
+  xmat <- vcountPDict(barcodes, subject, ...)
+  rownames(xmat) <- names(barcodes)
+  colnames(xmat) <- names(subject)
+  # ensure at most one match
+  stopifnot( (colSums(xmat) %>% max) == 1 )
+  # return vector with the name of the match or NA if none
+  match <- xmat %>%
+    {. == 1} %>%
+    apply(2, which) %>%
+    map_chr(~ifelse(length(.) == 0, NA, rownames(xmat)[.]))
+  #> enframe(match, 'subject_name', 'barcode_name')
+  match
+}
+```
+
+```{r}
+sanger_post <- sanger %>%
+  c(ref, .) %>%
+  OrientNucleotides(reference = 1, processors = 3) %>%
+  TrimDNA(
+    trim_pattern['left'],
+    trim_pattern['right'],
+    minWidth = 20,
+    type = 'sequences'
+  )
+```
+
+```{r}
+sanger_match <- match_barcode(sanger_post, ont_barcodes,
+  max.mismatch = 2, with.indels = TRUE
+)
+sanger_match %>% enframe %>% print
+```
+
+- A1: 000
+- A2: 008
+- B1: 001
+<!--  -->
+
+```{r}
+x_count %>%
+  filter(index_barcode %in% c('000', '008', '001')) %>%
+  filter(frac > 0.05, n >= 4)
+```
+
+The Sanger sequences give the same barcode as the Nanopore sequences, as expected.
+
+## Of ones with single q-seq barcode, check that they have the correct qPCR barcode
+
+## pick 25 with desired 5X5 design
+
+For this, we need to consider the qpcr barcodes as well.
+Can actually do this from the names,
+
+
+```{r}
+bc_map <- eblocks %>%
+  select(-well_position) %>%
+  separate(name, c('t', 'qpcr_barcode_set', 'qpcr_barcode_replicate',
+      'seq_barcode_id'), remove = F) %>%
+  mutate(
+    qpcr_barcode_id = str_glue('{qpcr_barcode_set}_{qpcr_barcode_replicate}')
+  ) %>%
+  relocate(qpcr_barcode_id, .before = seq_barcode_id) %>%
+  rename(eblock_sequence = sequence) %>%
+  glimpse
+```
+
+get the good wells, and join up the relevant bc info.
+Note, only some of the wells have minipreps available for transformations.
+
+```{r}
+wells <- x_count %>%
+  mutate(
+    index_barcode_int = as.integer(index_barcode),
+    has_miniprep = index_barcode_int <= 67
+  ) %>%
+  with_groups(index_barcode, slice_max, order_by = n, n = 1) %>%
+  rename(seq_barcode_id = ont_barcode) %>%
+  left_join(bc_map, by = 'seq_barcode_id') %>%
+  select(index_barcode, has_miniprep, qpcr_barcode_id, seq_barcode_id, n:frac, name,
+    eblock_sequence)
+```
+
+Let's see how many per qPCR barcode passing a basic minimum criterion,
+
+```{r}
+wells %>%
+  filter(total >= 100, frac >= .90) %>%
+  with_groups(qpcr_barcode_id, count)
+```
+
+what about with minipreps?
+
+```{r}
+wells %>%
+  filter(total >= 100, frac >= .90, has_miniprep) %>%
+  with_groups(qpcr_barcode_id, count)
+```
+
+Plenty are passing our condition.
+So we can be a bit more restrictive in the ones we pick.
+
+Stricter criterion:
+
+```{r}
+wells %>%
+  filter(total >= 100, frac >= .98, has_miniprep) %>%
+  with_groups(qpcr_barcode_id, count)
+```
+
+Still getting at least 5 per, though with less wiggle room.
+
+For wells passing the basic criterion, let's make a ranked list:
+
+```{r}
+wells_ranked <- wells %>%
+  filter(total >= 100, frac >= 0.9) %>%
+  arrange(qpcr_barcode_id, desc(frac), seq_barcode_id) %>%
+  with_groups(qpcr_barcode_id, mutate, rank = rank(-frac)) %>%
+  relocate(rank, .before = eblock_sequence)
+```
+
+```{r}
+wells_ranked %>%
+  write_csv('ranked-wells.csv')
+```
+
+Similar, but only for wells with minipreps available:
+
+```{r}
+wells_ranked_miniprep <- wells %>%
+  filter(total >= 100, frac >= 0.9, has_miniprep) %>%
+  arrange(qpcr_barcode_id, desc(frac), seq_barcode_id) %>%
+  with_groups(qpcr_barcode_id, mutate, rank = rank(-frac)) %>%
+  relocate(rank, .before = eblock_sequence)
+```
+
+```{r}
+wells_ranked_miniprep %>%
+  write_csv('ranked-wells-with-minipreps.csv')
+```
