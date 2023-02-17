@@ -33,6 +33,8 @@ editor_options:
 
 [Pooling spradsheet](https://docs.google.com/spreadsheets/d/12b04wXfEUhwDhB-e1jmSayz_7HByKeuQ8hD0rTrcnv4/edit#gid=0)
 
+[More information on phagemid structure](https://docs.google.com/document/d/1qNWIACM-xcg10vNcXyWT7-P4I7DpGqGQ3ywUtDN5qug/edit)
+
 AWS S3 bucket with data: s3://summer-seq-data/230203laura.tar
 
 My task according to Mike:
@@ -46,6 +48,7 @@ TODOS:
 		Mike: "this should be the primers used. You can confirm by loading the Nanopore data into R and looking for the matching sequences., and more generally by aligning the nanopore reads and the primer sequences"
  - Reach out to anjali to check in on length
  - Check in with Mike to ask how sequencing worked
+
 
 # Introduction
 Here we import, format, and clean
