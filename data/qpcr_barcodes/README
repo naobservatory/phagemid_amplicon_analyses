@@ -1,0 +1,3 @@
+`barcodes_postprocessed.csv` are taken from the `phagemid-design` Github repo: https://github.com/naobservatory/phagemid-design/blob/main/output/2022-05-02-barcode-primers/barcodes-postprocessed.csv
+The csv was created in this Rmarkdown: https://github.com/naobservatory/phagemid-design/blob/main/analysis/2022-04-29-primer-postprocessing/primer-postprocessing.Rmd
+
