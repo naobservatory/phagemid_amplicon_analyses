@@ -50,13 +50,6 @@ logs/*
 sequences/*
 !sequences/.gitkeep
 
-
-# Including the output folder without content
-output/*
-!output/.gitkeep
-!output/fastqc/*
-!output/multiqc/*
-
 # Excluding VSCode settings
 .settings.json
 
