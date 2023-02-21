@@ -77,8 +77,6 @@ import::from(Biostrings, complement, reverseComplement, width, DNAString,
   vmatchPDict, vcountPDict
 )
 
-import::from(DECIPHER, TrimDNA, AlignSeqs, OrientNucleotides, BrowseSeqs)
-
 # plotting helpers
 library(cowplot)
 theme_set(theme_cowplot())
@@ -89,13 +87,17 @@ library(ggbeeswarm)
 ## Defining directories
 
 ```{r, message=FALSE}
-metadata_data_path <- here("data/metadata")
-taxonomy_data_path <- here("data/taxonomy")
-output_data_path <- here("output")
-project_path <- here('../illumina_pilot')
+metadata <- here("data/metadata")
+taxonomy <- here("data/taxonomy")
+output <- here("output")
+project <- here('../tracer_analyses')
 ```
 
 ```{r}
-#Reading in sequencing data
+#Reading in barcodes # TODO WHICH ONES
+seq_barcodes <- here('data', 'qpcr_barcodes',
+  'barcodes_postprocessed.csv') %>%
+  read_csv %>%
+  glimpse
 
 ```
