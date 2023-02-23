@@ -4,18 +4,17 @@ This repository contains code and data to analyze Amplicon sequencing runs of th
 
 ## Sequence Download
 Sequences can be downloaded from this S3 bucket using the following command:
-`aws s3 cp s3://summer-seq-data/230203laura.tar sequences`
-
-You should then unzip them using:
 ```
-cd sequences ; tar -xvf 230203laura.tar
-cd 230203laura ; gunzip *.fastq.gz
+mkdir sequences
+cd sequences
+aws s3 cp s3://summer-seq-data/230203laura.tar .
 ```
 
-Finally concatenate all FASTQ files and move the resulting file to the output folder
-
+You can then unzip, concatenate, and move them to the output directory
 ```
+tar -xvf 230203laura.tar ;cd 230203laura ; gunzip *.fastq.gz
+
 cat *.fastq > phagemid_amplicon_nanopore.fastq
-mv phagemid_amplicon_nanopore.fastq ../../output/sequences
-```
 
+mkdir ../../output/sequences ; mv phagemid_amplicon_nanopore.fastq ../../output/sequences/phagemid_amplicon_nanopore.fastq
+``

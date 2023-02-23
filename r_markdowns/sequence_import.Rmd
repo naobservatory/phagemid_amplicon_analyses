@@ -51,7 +51,7 @@ TODOS:
 
 
 # Introduction
-Here we import, format, and clean
+Here we import, format, and clean ONT sequencing data.
 
 # Setup
 
@@ -105,6 +105,9 @@ cd 230203laura ; gunzip *.fastq.gz
 
 #Concatenating files
 cat *.fastq > phagemid_amplicon_nanopore.fastq
+
+#Moving files to output directory
+mkdir ../../output/sequences
 mv phagemid_amplicon_nanopore.fastq ../../output/sequences/phagemid_amplicon_nanopore.fastq
 
 ```
