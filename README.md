@@ -17,4 +17,4 @@ tar -xvf 230203laura.tar ;cd 230203laura ; gunzip *.fastq.gz
 cat *.fastq > phagemid_amplicon_nanopore.fastq
 
 mkdir ../../output/sequences ; mv phagemid_amplicon_nanopore.fastq ../../output/sequences/phagemid_amplicon_nanopore.fastq
-``
+```
