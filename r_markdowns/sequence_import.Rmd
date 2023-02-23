@@ -87,17 +87,24 @@ library(ggbeeswarm)
 ## Defining directories
 
 ```{r, message=FALSE}
-metadata <- here("data/metadata")
-taxonomy <- here("data/taxonomy")
+phagemid_designs <- here("data/phagemid_design_ouput")
 output <- here("output")
 project <- here('../tracer_analyses')
 ```
 
-```{r}
-#Reading in barcodes # TODO WHICH ONES
-seq_barcodes <- here('data', 'qpcr_barcodes',
-  'barcodes_postprocessed.csv') %>%
-  read_csv %>%
-  glimpse
+# Loading and concatenating data
+```{bash}
+# Creating directory and downloading data
+mkdir sequences
+cd sequences
+aws s3 cp s3://summer-seq-data/230203laura.tar .
+
+#Unzipping files
+tar -xvf 230203laura.tar
+cd 230203laura ; gunzip *.fastq.gz
+
+#Concatenating files
+cat *.fastq > phagemid_amplicon_nanopore.fastq
+mv phagemid_amplicon_nanopore.fastq ../../output/sequences/phagemid_amplicon_nanopore.fastq
 
 ```
