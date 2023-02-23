@@ -93,8 +93,8 @@ project <- here('../tracer_analyses')
 ```
 
 # Loading and concatenating data
-```{bash}
-# Creating directory and downloading data
+Bash commands:
+```
 mkdir sequences
 cd sequences
 aws s3 cp s3://summer-seq-data/230203laura.tar .
