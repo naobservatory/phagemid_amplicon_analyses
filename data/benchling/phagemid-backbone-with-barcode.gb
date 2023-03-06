@@ -1,0 +1,219 @@
+LOCUS       Phagemid_backbone_with_ 1918 bp ds-DNA     circular     03-JUN-2022
+DEFINITION  .
+FEATURES             Location/Qualifiers
+     misc_feature    complement(182..284)
+                     /label="Cat promoter maybe?"
+                     /ApEinfo_revcolor="#ffef86"
+                     /ApEinfo_fwdcolor="#ffef86"
+     misc_feature    285..309
+                     /label="Stuff upstream of promoter"
+                     /ApEinfo_revcolor="#9eafd2"
+                     /ApEinfo_fwdcolor="#9eafd2"
+     primer          complement(289..320)
+                     /label="kanR_gp41-1N_rev"
+                     /note="sequence: gaccctcctagccaacttttggcgaaaatgag"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     misc_feature    290..309
+                     /label="Barcode Overhang"
+                     /ApEinfo_revcolor="#d6b295"
+                     /ApEinfo_fwdcolor="#d6b295"
+     primer          290..309
+                     /label="kanN_seq_fwd"
+                     /note="sequence: tcattttcgccaaaagttgg"
+                     /ApEinfo_revcolor="#f58a5e"
+                     /ApEinfo_fwdcolor="#f58a5e"
+     primer          complement(290..309)
+                     /label="tag_overhang_rev"
+                     /note="sequence: ccaacttttggcgaaaatga"
+                     /ApEinfo_revcolor="#faac61"
+                     /ApEinfo_fwdcolor="#faac61"
+     misc_feature    complement(300..309)
+                     /label="rev_primer"
+                     /ApEinfo_revcolor="#b7e6d7"
+                     /ApEinfo_fwdcolor="#b7e6d7"
+     primer          549..583
+                     /label="R6k_fwd"
+                     /note="sequence: tcgccaaaagttggctaggagggtcagccgttaag"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     primer          549..583
+                     /label="R6k_fwd"
+                     /note="sequence: cccagggcttcccgctaggagggtcagccgttaag"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     misc_feature    563..583
+                     /label="Barcode overhang"
+                     /ApEinfo_revcolor="#b4abac"
+                     /ApEinfo_fwdcolor="#b4abac"
+     primer          563..583
+                     /label="tag_overhang_fwd"
+                     /note="sequence: ctaggagggtcagccgttaag"
+                     /ApEinfo_revcolor="#faac61"
+                     /ApEinfo_fwdcolor="#faac61"
+     misc_feature    563..969
+                     /label="From pSEV230"
+                     /ApEinfo_revcolor="#c6c9d1"
+                     /ApEinfo_fwdcolor="#c6c9d1"
+     misc_feature    565..582
+                     /label="R6k_fwd"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     rep_origin      571..969
+                     /label="R6K\origin"
+                     /ApEinfo_revcolor="#ffef86"
+                     /ApEinfo_fwdcolor="#ffef86"
+     primer          complement(635..653)
+                     /label="oCLP118"
+                     /note="sequence: caagccagggatgtaacgc"
+                     /ApEinfo_revcolor="#b7e6d7"
+                     /ApEinfo_fwdcolor="#b7e6d7"
+     primer          complement(658..680)
+                     /label="R6K_1"
+                     /note="sequence: CTTTTAAGGTTTAACGGTTGTGG"
+                     /ApEinfo_revcolor="#f8d3a9"
+                     /ApEinfo_fwdcolor="#f8d3a9"
+     primer          complement(658..680)
+                     /label="SEV1391 (r6k ori seqR)"
+                     /note="sequence: cttttaaggtttaacggttgtgg"
+                     /ApEinfo_revcolor="#ffef86"
+                     /ApEinfo_fwdcolor="#ffef86"
+     primer          complement(949..979)
+                     /label="R6k_rev"
+                     /note="sequence: GTttaagactgccgcttatgtctattgctgg"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     primer          955..987
+                     /label="M13ori_fwd"
+                     /note="sequence: atagacataagcggcagtcttaaACGCGCCCTG"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     misc_feature    970..1445
+                     /label="F1 ori (from WT T7, then pBW5x3)"
+                     /ApEinfo_revcolor="#c6c9d1"
+                     /ApEinfo_fwdcolor="#c6c9d1"
+     misc_feature    978..1433
+                     /label="f1 ori (from WT T7)"
+                     /ApEinfo_revcolor="#84b0dc"
+                     /ApEinfo_fwdcolor="#84b0dc"
+     misc_feature    986..1027
+                     /label="Library 3 fragment: front of packaging signal"
+                     /ApEinfo_revcolor="#c7b0e3"
+                     /ApEinfo_fwdcolor="#c7b0e3"
+     primer          989..1010
+                     /label="ED1428"
+                     /note="sequence: AGCGGCGCATtaagcgcggcgg"
+                     /ApEinfo_revcolor="#d59687"
+                     /ApEinfo_fwdcolor="#d59687"
+     misc_feature    989..1066
+                     /label="packaging signal"
+                     /ApEinfo_revcolor="#b1ff67"
+                     /ApEinfo_fwdcolor="#b1ff67"
+     misc_feature    989..1255
+                     /label="packaging signal and (-) ori"
+                     /ApEinfo_revcolor="#d59687"
+                     /ApEinfo_fwdcolor="#d59687"
+     misc_feature    1002..1043
+                     /label="Library 2 fragment: packing signal"
+                     /ApEinfo_revcolor="#9eafd2"
+                     /ApEinfo_fwdcolor="#9eafd2"
+     misc_feature    1028..1069
+                     /label="Library 4 fragment: back of packaging signal"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     primer          1172..1190
+                     /label="ED1353"
+                     /note="sequence: ctcgaccccaaaaaacttg"
+                     /ApEinfo_revcolor="#75c6a9"
+                     /ApEinfo_fwdcolor="#75c6a9"
+     misc_feature    1179..1220
+                     /label="Library 5 fragment: - ori"
+                     /ApEinfo_revcolor="#b4abac"
+                     /ApEinfo_fwdcolor="#b4abac"
+     misc_feature    1256..1399
+                     /label="complete (+) origin"
+                     /ApEinfo_revcolor="#c7b0e3"
+                     /ApEinfo_fwdcolor="#c7b0e3"
+     misc_feature    1259..1302
+                     /label="essential (+) ori"
+                     /ApEinfo_revcolor="#75c6a9"
+                     /ApEinfo_fwdcolor="#75c6a9"
+     misc_feature    1260..1301
+                     /label="Library 1 fragment: + origin"
+                     /ApEinfo_revcolor="#9eafd2"
+                     /ApEinfo_fwdcolor="#9eafd2"
+     misc_feature    1302..1343
+                     /label="Library 6 fragment: min struct DNA window"
+                     /ApEinfo_revcolor="#75c6a9"
+                     /ApEinfo_fwdcolor="#75c6a9"
+     primer          complement(1423..1462)
+                     /label="M13ori_rev"
+                     /note="sequence: aaggcagttattggtgccaagtcaaaagcAAATTGTAAAC"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     primer          1438..1463
+                     /label="kanR_gp41-1N_fwd"
+                     /note="sequence: ttgacttggcaccaataactgcctta"
+                     /ApEinfo_revcolor="#c7b0e3"
+                     /ApEinfo_fwdcolor="#c7b0e3"
+     misc_feature    1446..309
+                     /label="From pSiMPlk_N"
+                     /ApEinfo_revcolor="#c6c9d1"
+                     /ApEinfo_fwdcolor="#c6c9d1"
+     primer          complement(1446..1465)
+                     /label="kanN_seq_rev"
+                     /note="sequence: tttaaggcagttattggtgc"
+                     /ApEinfo_revcolor="#d6b295"
+                     /ApEinfo_fwdcolor="#d6b295"
+     misc_feature    complement(1470..1736)
+                     /label="gp41-1N"
+                     /ApEinfo_revcolor="#c7b0e3"
+                     /ApEinfo_fwdcolor="#c7b0e3"
+     CDS             complement(1470..1736)
+                     /label="Translation 1736-1470"
+                     /translation="CLDLKTQVQTPQGMKEISNIQVGDLVLSNTGYNEVLNVFPKSKKKSYKITLEDGKEIICSEEHLFPTQTGEMNISGGLKEGMCLYVKE*"
+     misc_feature    complement(1737..1745)
+                     /label="SGY"
+                     /ApEinfo_revcolor="#c6c9d1"
+                     /ApEinfo_fwdcolor="#c6c9d1"
+     misc_feature    complement(1746..181)
+                     /label="kanrR_N"
+                     /ApEinfo_revcolor="#84b0dc"
+                     /ApEinfo_fwdcolor="#84b0dc"
+     CDS             complement(1746..181)
+                     /label="Translation 181-1746"
+                     /translation="MSHIQRETSCSRPRLNSNMDADLYGYKWARDNVGQSGATIYRLYGKPDAPELFLKHGKGSVANDVTDEMVRLNWLTEFMPLPTIKHFIRTPDDAWLLTTAIPGKTAFQVLEEYPDSGE"
+ORIGIN
+        1 CGCTACCTTT GCCATGTTTC AGAAACAACT CTGGCGCATC GGGCTTCCCA TACAATCGAT
+       61 AGATTGTCGC ACCTGATTGC CCGACATTAT CGCGAGCCCA TTTATACCCA TATAAATCAG
+      121 CATCCATGTT GGAATTTAAT CGCGGCCTAG AGCAAGACGT TTCCCGTTGA ATATGGCTCA
+      181 Ttttagcttc cttagctcct gaaaatctcg ataactcaaa aaatacgccc ggtagtgatc
+      241 ttatttcatt atggtgaaag ttggaacctc ttacgtgccg atcaacgtct cattttcgcc
+      301 aaaagttggC CATGCAGTGC TTTGACCGTG AGTAGTGCCC TGTAATCTAT CTGTCAGTCA
+      361 AAACCCGAGA GTCCCCTAGT AGGTTCGAAC AGGTCCACTC CCCTCGTCAC TATACCAACT
+      421 TGTTTCGTGC AGAGAGACCG TCAGTCAGGA GCTTCGGGCC TAACTAACTA CTAGTCAACA
+      481 ACCGAACCTT TGAATCAGAA TGACAATCCG CCGGTCTTCG TGTTCAGCAC AGTCTAGCTT
+      541 TCGACGTAAC GTAAAGCGGT TCctaggagg gtcagccgtt aagtgttcct gtgtcactca
+      601 aaattgcttt gagaggctct aagggcttct cagtgcgtta catccctggc ttgttgtcca
+      661 caaccgttaa accttaaaag ctttaaaagc cttatatatt cttttttttc ttataaaact
+      721 taaaacctta gaggctattt aagttgctga tttatattaa ttttattgtt caaacatgag
+      781 agcttagtac gttagccatg agggtttagt tcgttaaaca tgagagctta gtacgttaaa
+      841 catgagagct tagtacgtga aacatgagag cttagtacgt gaaacatgag agcttagtac
+      901 gtactatcaa caggttgaac tgctgatctt cagatccgtc ccggtaaacc agcaatagac
+      961 ataagcggca gtcttaaACG CGCCCTGTAG CGGCGCATTA AGCGCGGCGG GTGTGGTGGT
+     1021 TACGCGCAGC GTGACCGCTA CACTTGCCAG CGCCCTAGCG CCCGCTCCTT TCGCTTTCTT
+     1081 CCCTTCCTTT CTCGCCACGT TCGCCGGCTT TCCCCGTCAA GCTCTAAATC GGGGGCTCCC
+     1141 TTTAGGGTTC CGATTTAGTG CTTTACGGCA CCTCGACCCC AAAAAACTTG ATTTGGGTGA
+     1201 TGGTTCACGT AGTGGGCCAT CGCCCTGATA GACGGTTTTT CGCCCTTTGA CGTTGGAGTC
+     1261 CACGTTCTTT AATAGTGGAC TCTTGTTCCA AACTGGAACA ACACTCAAaC CTATCTCGGG
+     1321 CTATTCTTTT GATTTATAAG GGATTTTGCC GATTTCGGCC TATTGGTTAA AAAATGAGCT
+     1381 GATTTAACAA AAATTTAACG CGAATTTTAA CAAAATATTA ACGTTTACAA TTTgcttttg
+     1441 acttggcacc aataactgcc ttaaaaaaat tattctttaa catacagaca cataccttct
+     1501 ttcagaccac cggagatgtt catttcacca gtctgcgtcg gaaacaggtg ttcttcggaa
+     1561 cagatgattt ccttgccatc ttccagggtg attttgtaag actttttttt agatttcggg
+     1621 aagacgttca gaacttcgtt gtaacccgtg ttgctcagta ccagatcacc gacctggatg
+     1681 ttggaaattt ccttcatacc ctgcggggtc tgaacctggg ttttcagatc caagcagtaa
+     1741 ccagaTTCAC CTGAATCAGG ATATTCTTCT AATACCTGGA ATGCTGTTTT CCCGGGGATC
+     1801 GCAGTGGTGA GTAACCATGC ATCATCAGGA GTACGGATAA AATGCTTGAT GGTCGGAAGA
+     1861 GGCATAAATT CCGTCAGCCA GTTTAGTCTG ACCATCTCAT CTGTAACATC ATTGGCAA
+//
