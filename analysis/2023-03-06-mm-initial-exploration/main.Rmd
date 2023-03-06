@@ -1,0 +1,276 @@
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(fs)
+library(furrr)
+plan(multicore, workers = 3)
+import::from(Biostrings, complement, reverseComplement, width, DNAString,
+  DNAStringSet, readDNAStringSet, subseq,
+  vmatchPDict, vcountPDict
+)
+import::from(DECIPHER, TrimDNA, AlignSeqs, OrientNucleotides, BrowseSeqs)
+```
+
+```{r}
+seq_barcodes <- here('data/phagemid_design_output', '2022-05-18-sequencing-barcodes',
+  'sequencing-barcodes.csv') %>%
+  read_csv %>%
+  glimpse
+```
+
+Forward and reverse primers for the sequencing barcodes
+
+```{r}
+fwd <- seq_barcodes %>% pull(primer_1) %>% unique
+rev <- seq_barcodes %>% pull(primer_2) %>% unique
+rev_rc <- rev %>% DNAString %>% reverseComplement %>% as.character
+stopifnot(identical(length(fwd), 1L))
+stopifnot(identical(length(rev), 1L))
+```
+
+Phagemid reference genome
+
+```{r}
+phagemid_ref <- here('data', 'benchling', 'phagemid-backbone-with-barcode.fasta') %>% 
+  readDNAStringSet() %>%
+  print
+phagemid_ref %>% names
+```
+
+Sequence data
+
+```{r}
+reads <- here('data', 'sequences', 'phagemid_amplicon_nanopore.fastq.gz') %>%
+  readDNAStringSet(format = 'fastq')
+# Check if any unclassified reads
+reads %>%
+  {str_detect(names(.), 'unclassified')} %>%
+  any
+```
+
+Note, this was a single plex run, so the reads did not have to be demultplexed, which I think is why there are no 'unclassified' reads.
+
+```{r}
+names(reads) %>% head(3)
+```
+
+```{r}
+reads %>% width %>% qplot
+reads %>% width %>% median
+```
+
+Note, the reads are much longer than I expect based on thinking that only the sequencing barcode region was amplified.
+
+## testing
+
+
+```{r}
+x <- reads[1:10]
+x %>% str_detect(fwd)
+```
+
+## Orient all reads to a common reference orientation
+
+```{r, message = FALSE}
+reads_with_ref <- c(phagemid_ref, reads)
+reads_oriented <- OrientNucleotides(reads_with_ref, reference = 1, processors = 3)
+```
+
+TODO: concider the threshold and orientation settings
+
+## Trim using the flanking sequence
+
+```{r}
+seq_barcodes %>% slice(1) %>% glimpse
+```
+
+We'll trim the reads specifically to the ONT barcodes, which are flanked by the forward primer and first spacer on the left, and the second space and probe sequence on the right.
+Future versions should consider using an even longer right sequence that includes the third spacer and reverse-complement of the reverse primer, which would give more specific matching, but we need to make sure to tolerate the high error rate in the ONT reads.
+
+```{r}
+trim_pattern <- seq_barcodes %>%
+  slice(1) %>%
+  transmute(
+    left = str_c(primer_1, spacer_1),
+    right = str_c(spacer_2, probe),
+  ) %>%
+  unlist
+```
+
+Now we'll trim, requiring a min width of 20 bp in the internal sequence to pass to the next step of matching to the ONT barcodes.
+First, I'll test the trimming call on the reference sequence,
+
+```{r, message = FALSE}
+TrimDNA(
+  reads_oriented[1],
+  trim_pattern['left'],
+  trim_pattern['right'],
+  minWidth = 20,
+  type = 'sequences'
+)
+```
+
+Next, let's trim the reads (excluding the reference sequence).
+I've currently set the maxWidth and minDistance options to their defaults.
+
+```{r, message = FALSE}
+reads_oriented_trimmed <- TrimDNA(
+  reads_oriented[-1],
+  trim_pattern['left'],
+  trim_pattern['right'],
+  minWidth = 20,
+  maxDistance = 0.1,
+  minOverlap = 5,
+  type = 'sequences'
+)
+round(length(reads_oriented_trimmed) / length(reads_oriented[-1]), 2)
+```
+
+Note, only reads where at least one of the flanking sequences was matched are passed on.
+
+Let's check how the length distribution post trimming aligns with what we expect
+
+```{r}
+probe_length <- seq_barcodes$probe_length %>% unique
+ont_barcode_length <- seq_barcodes$ont_barcode_length %>% unique
+expected_length <- ont_barcode_length
+expected_length 
+```
+
+```{r}
+reads_oriented[-1] %>% width %>% summary
+reads_oriented_trimmed %>% width %>% summary
+mean(width(reads_oriented_trimmed) == expected_length)
+mean(width(reads_oriented_trimmed) < expected_length * 1.5)
+width(reads_oriented_trimmed) %>% qplot +
+  scale_x_log10() +
+  expand_limits(x = 10) +
+  geom_vline(xintercept = expected_length, color = 'darkred')
+```
+
+Looks like it worked; though most of the reads were not successfully trimmed at both primers.
+
+TODO
+
+- Consider TrimDNA options and how might increase trimming.
+- Try adding quality scores to the reads, and using during trimming (see the quality argument in TrimDNA)
+
+Note, this includes the reference sequence; but we do not want that downstream.
+
+```{r}
+reads_post <- reads_oriented_trimmed %>%
+  {.[width(.) < expected_length * 1.5]}
+```
+
+## Do some QC - check stats of matches; check that see the spacer and probe sequences
+
+TODO
+
+## For successfully trimmed seqs, match against barcodes
+
+Get the ONT barcodes for matching,
+
+```{r}
+ont_barcodes_df <- seq_barcodes %>%
+  select(ont_barcode_id, ont_barcode_sequence)
+ont_barcodes <- ont_barcodes_df %>% 
+  deframe %>%
+  DNAStringSet
+```
+
+TODO: Check what the min edit distance is; use this to determine the max allowed edit distance for matching,
+
+Do once I update Bioconductor and get DNABarcodes installed.
+
+```{r}
+xmat <- vcountPDict(ont_barcodes, reads_post,
+  max.mismatch = 3, with.indels = TRUE)
+rownames(xmat) <- names(ont_barcodes)
+colnames(xmat) <- names(reads_post)
+#> ~vcountPDict(pats, .x, with.indels = TRUE, max.mismatch = 2)),
+```
+
+possible improvements
+
+- get the best match, up to sufficient closeness
+- only use the 25 barcodes we ended up using in our tracer set, rather than the full set of 96 ONT barcodes
+<!--  -->
+
+Check that only one match per read:
+
+```{r}
+stopifnot( (colSums(xmat) %>% max) == 1 )
+```
+
+What fraction of reads match any barcode?
+
+```{r}
+(colSums(xmat) >= 1) %>% mean %>% round(2)
+```
+
+- Turn into a dataframe with one row per read, filtered to matches
+  - for qc, might want to track the total number of reads / non-matches
+- extract the indexing barcode from the read name for well-matching
+<!--  -->
+
+```{r}
+x <- xmat %>%
+  t %>%
+  as_tibble(rownames = 'read_name') %>%
+  pivot_longer(cols = starts_with('BC'), names_to = 'ont_barcode_id', values_to = 'match') %>%
+  filter(match == 1) %>%
+  select(-match) %>%
+  left_join(ont_barcodes_df, by = 'ont_barcode_id') %>%
+  glimpse
+```
+
+```{r}
+x %>%
+  count(ont_barcode_id, ont_barcode_sequence, name = 'num_reads') %>%
+  arrange(desc(num_reads)) %>%
+  mutate(fraction = num_reads / sum(num_reads)) %>%
+  knitr::kable(digits = 3)
+```
+
+TODO
+
+- [ ] report the fraction of reads passing through the stages
+
+```{r}
+tibble(
+  input = length(reads),
+  trimmed = length(reads_oriented_trimmed),
+  target_length = length(reads_post),
+  final = nrow(x)
+) %>%
+  pivot_longer(everything(), names_to = 'stage', values_to = 'num_reads') %>%
+  mutate(frac_of_input = num_reads / num_reads[1]) %>%
+  knitr::kable(digits = 3)
+```
+
+
+## Notes
+
+For debugging, compute the expected length of the amplicon were we to have amplified the expected region,
+
+```{r}
+y <- seq_barcodes %>%
+  slice(1) %>%
+  glimpse
+y %>% pull(amplicon_length)
+```
+
+Next -- view the alignment of the sequencing barcode amplicon with the nanopore reads and/or the reads with the ref and confirm we seq'd the whole backbone.
+
+
+```{r, message = FALSE, eval = F}
+amplicon <- c(amplicon = y$amplicon) %>% DNAStringSet
+alignment <- c(reads_oriented[1:20], amplicon) %>%
+  AlignSeqs(processors = 3)
+BrowseSeqs(alignment, highlight = 1)
+```
+
+Perhaps we can align the reads in Benchling?
+It would be handy to have the annotations.
