@@ -63,22 +63,45 @@ reads %>% width %>% median
 
 Note, the reads are much longer than I expect based on thinking that only the sequencing barcode region was amplified.
 
-## testing
-
-
-```{r}
-x <- reads[1:10]
-x %>% str_detect(fwd)
-```
-
 ## Orient all reads to a common reference orientation
 
 ```{r, message = FALSE}
 reads_with_ref <- c(phagemid_ref, reads)
-reads_oriented <- OrientNucleotides(reads_with_ref, reference = 1, processors = 3)
+reads_oriented <- OrientNucleotides(reads_with_ref, reference = 1, processors = 3, type = 'both')
+reads_orientation <- reads_oriented[[1]]
+reads_oriented <- reads_oriented[[2]]
 ```
 
-TODO: concider the threshold and orientation settings
+
+Note, I am just using default settings, and I don't know how effective this step is.
+I should be able to check what reads have been reoriented.
+Perhaps we should expect ~50% to reoriented if this is 100% effective; or maybe 75%?
+Note that reversing and complementing are both allowed.
+
+```{r}
+reads_orientation %>% table %>% {. / sum(.)} %>% round(3)
+```
+
+A bit under 50% of the reads have been reverse complemented, and a bit over were left unchanged, suggesting this is working pretty well.
+
+What about for the shortest reads?
+These are much shorter than the reference, which I think is fine but not sure.
+
+```{r}
+reads_tbl <- tibble(
+  name = names(reads_oriented), 
+  width = width(reads_oriented),
+  orientation = reads_orientation
+)
+```
+
+```{r}
+reads_tbl %>% count(orientation)
+reads_tbl %>% count(width < 200, orientation)
+```
+
+We see a similar pattern for reads less than 200bp, suggesting reorienting works fine for these reads.
+
 
 ## Trim using the flanking sequence
 
@@ -249,6 +272,61 @@ tibble(
   mutate(frac_of_input = num_reads / num_reads[1]) %>%
   knitr::kable(digits = 3)
 ```
+
+## Examining the shorter reads
+
+One hypothesis raised by Anjali is that we did amplify the 109-bp seq barcode region, but the magnetic-bead cleanup biased the library towards long unamplified sequences.
+In this case, we would expect to see the seq barcode region amplicons when we restrict our view to the appropriately sized sequences.
+We would also expect to see a peak at the expected sized.
+(Note, I'm not sure what the adapter sequence is, and whether we should expect to see that at the end, and how much length that would add).
+
+```{r}
+reads_tbl %>%
+  mutate(short = width < 300) %>%
+  ggplot(aes(width)) +
+  facet_wrap(~short, scales = 'free') +
+  geom_histogram()
+```
+
+```{r}
+reads %>% {.[width(.) < 200]}
+reads_oriented %>% {.[width(.) < 200]}
+```
+
+```{r}
+reads_oriented %>% {.[width(.) < 200]} %>% 
+  Biostrings::substr(1, 40) %>% 
+  rlang::set_names(NULL) %>%
+  sample(50) %>%
+  cat(sep = '\n')
+```
+
+
+```{r}
+fwd
+rev
+```
+
+
+```{r}
+reads_tbl1 <- reads_tbl %>%
+  add_column(sequence = reads_oriented %>% as.character %>% set_names(NULL)) %>%
+  mutate(
+    has_fwd = str_detect(sequence, fwd),
+  )
+
+```
+
+```{r}
+reads_tbl1 %>% count(width < 300, has_fwd)
+```
+
+Next: Look at the position of the fwd primer in the sequences.
+(And/Or the sequencing barcode region)
+
+## Examining the ends of the (long) reads
+
+Is there a common sequence at the start/stop of the reads that would indicate that they were amplified using a particular primer set?
 
 
 ## Notes
